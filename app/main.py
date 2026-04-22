@@ -1,3 +1,5 @@
+from hashlib import new
+
 from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 from typing import Any
@@ -6,37 +8,37 @@ app = FastAPI()
 
 db = {
     12001: {
-        "Weight": 0.6,
+        "weight": 0.6,
         "content": "Glassware",
         "status": "In-Transit"
     },
     12002: {
-        "Weight": 0.5,
+        "weight": 0.5,
         "content": "Books",
         "status": "Pending"
     },
     12003: {
-        "Weight": 3.0,
+        "weight": 3.0,
         "content": "Furniture",
         "status": "In-Transit"
     },
     12004: {
-        "Weight": 0.2,
+        "weight": 0.2,
         "content": "Clothing",
         "status": "Delivered"
     },
     12005: {
-        "Weight": 1.5,
+        "weight": 1.5,
         "content": "Tools",
         "status": "Available"
     },
     12006: {
-        "Weight": 0.8,
+        "weight": 0.8,
         "content": "Toys",
         "status": "In-Transit"
     },
     12007: {
-        "Weight": 2.5,
+        "weight": 2.5,
         "content": "Appliances",
         "status": "Pending"
     }
@@ -81,6 +83,23 @@ def submit_shipment(weight: float | None = None, content: str | None = None) -> 
     }
     return {"id": new_id} | db[new_id]
 
+@app.post("/shipment/body")
+def submit_shipment_body(data: dict[str, Any]) -> dict[str, Any]:
+    weight = data["weight"]
+    content = data["content"]
+    new_id = max(db.keys()) + 1
+    db[new_id] = {
+        "weight": weight,
+        "content": content,
+        "status": "Placed"
+    }
+    return {"id": new_id} | db[new_id]
+
+@app.get("/shipment/{field}")
+def shipment_field(field: str, id: int) -> Any:
+    return {
+        db[id][field]
+    }
 @app.get("/http_docs", include_in_schema=False)
 def get_scalar_docs():
     return get_scalar_api_reference(openapi_url= app.openapi_url, title="Scalar API Reference")
