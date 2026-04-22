@@ -94,10 +94,11 @@ def submit_shipment_body(data: dict[str, Any]) -> dict[str, Any]:
     return {"id": new_id} | db[new_id]
 
 @app.get("/shipment/{field}")
-def shipment_field(field: str, id: int) -> Any:
+def shipment_field(field: str, id: int) -> dict[str, Any]:
     return {
-        db[id][field]
+        field: db[id][field]
     }
+
 @app.get("/http_docs", include_in_schema=False)
 def get_scalar_docs():
     return get_scalar_api_reference(openapi_url= app.openapi_url, title="Scalar API Reference")
