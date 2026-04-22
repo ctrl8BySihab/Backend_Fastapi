@@ -99,7 +99,7 @@ def patch_shipment(
     weight: float | None = None,
     content: str | None = None,
     detail: str | None = None
-):
+) -> dict[str, Any]:
     if id not in db:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -114,8 +114,10 @@ def patch_shipment(
     return {"id": id} | db[id]
 
 
-def patch_shipment_body():
-    pass
+@app.patch("/shipment/body")
+def patch_shipment_body(id : int, data : dict[str, Any]) -> dict[str, Any]:
+    db[id].update(data)
+    return {"id": id} | db[id]
 
 
 @app.get("/http_docs", include_in_schema=False)
