@@ -31,7 +31,7 @@ def get_shipment(id: int | None = None) -> dict[str, Any]:
     if id not in db:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Given ID {id} does not exist in the database!",
+            detail=f"Given ID #{id} does not exist in the database!",
         )
     return {"id": id} | db[id]
 
@@ -118,6 +118,12 @@ def patch_shipment(
 def patch_shipment_body(id : int, data : dict[str, Any]) -> dict[str, Any]:
     db[id].update(data)
     return {"id": id} | db[id]
+
+
+@app.delete("/shipment")
+def delete_shipment(id: int) -> dict[str, Any]:
+    data = db.pop(id)
+    return {"detail": f"Shipment with ID #{id} has been deleted!", "data": {"id": id} | data}
 
 
 @app.get("/http_docs", include_in_schema=False)
