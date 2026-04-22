@@ -8,37 +8,37 @@ db = {
     12001: {
         "weight": 0.6,
         "content": "Glassware",
-        "status": "In-Transit"
+        "detail": "In-Transit"
     },
     12002: {
         "weight": 0.5,
         "content": "Books",
-        "status": "Pending"
+        "detail": "Pending"
     },
     12003: {
         "weight": 3.0,
         "content": "Furniture",
-        "status": "In-Transit"
+        "detail": "In-Transit"
     },
     12004: {
         "weight": 0.2,
         "content": "Clothing",
-        "status": "Delivered"
+        "detail": "Delivered"
     },
     12005: {
         "weight": 1.5,
         "content": "Tools",
-        "status": "Available"
+        "detail": "Available"
     },
     12006: {
         "weight": 0.8,
         "content": "Toys",
-        "status": "In-Transit"
+        "detail": "In-Transit"
     },
     12007: {
         "weight": 2.5,
         "content": "Appliances",
-        "status": "Pending"
+        "detail": "Pending"
     }
 }
 
@@ -77,7 +77,7 @@ def submit_shipment(weight: float | None = None, content: str | None = None) -> 
     db[new_id] = {
         "weight": weight,
         "content": content,
-        "status": "Placed"
+        "detail": "Placed"
     }
     return {"id": new_id} | db[new_id]
 
@@ -89,7 +89,7 @@ def submit_shipment_body(data: dict[str, Any]) -> dict[str, Any]:
     db[new_id] = {
         "weight": weight,
         "content": content,
-        "status": "Placed"
+        "detail": "Placed"
     }
     return {"id": new_id} | db[new_id]
 
@@ -98,6 +98,25 @@ def shipment_field(field: str, id: int) -> dict[str, Any]:
     return {
         field: db[id][field]
     }
+
+@app.put("/shipment")
+def update_shipment(id: int, weight: float | None = None, content: str | None = None, detail: str = "Placed"):
+    if weight is None or content is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide both weight and content to submit a shipment!"
+        )
+    if weight > 25:
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Maximum weight is 25kg!"
+        )
+    db[id] = {
+        "weight": weight,
+        "content": content,
+        "detail": detail
+    }
+    return {"id": id} | db[id]
 
 @app.get("/http_docs", include_in_schema=False)
 def get_scalar_docs():
