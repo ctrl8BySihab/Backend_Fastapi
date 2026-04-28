@@ -59,7 +59,11 @@ def submit_shipment_body(data: dict[str, Any]) -> dict[str, Any]:
     weight = data["weight"]
     content = data["content"]
     new_id = max(db.keys()) + 1
-    db[new_id] = {"weight": weight, "content": content, "detail": "Placed"}
+    db[new_id] = {
+        "weight": weight, 
+        "content": content, 
+        "detail": "Placed"
+    }
     return {"id": new_id} | db[new_id]
 
 
