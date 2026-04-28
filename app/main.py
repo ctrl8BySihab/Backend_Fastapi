@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 from typing import Any
 
-from app.schemas import Shipment
+from app.schemas import Shipment, ShipmentUpdate
 
 app = FastAPI()
 
@@ -102,6 +102,11 @@ def update_shipment(
     return {"id": id} | db[id]
 
 
+@app.put("/shipment/body")
+def update_shipment_body(id: int, data: dict[str, ShipmentUpdate]) -> dict[str, Any]:
+    db[id].update(data)
+    return {"id": id} | db[id]
+
 @app.patch("/shipment")
 def patch_shipment(
     id: int,
@@ -124,9 +129,8 @@ def patch_shipment(
 
 
 @app.patch("/shipment/body")
-def patch_shipment_body(id : int, data : Shipment) -> dict[str, Any]:
-    
-    db[id].update({"weight": data.weight, "content": data.content, "destination": data.destination, "detail": data.details})
+def patch_shipment_body(id : int, data : dict[str, Any]) -> dict[str, Any]:   
+    db[id].update(data)
     return {"id": id} | db[id]
 
 
