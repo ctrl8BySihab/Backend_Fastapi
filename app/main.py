@@ -1,147 +1,78 @@
 from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
-from typing import Any
 
-from app.schemas import Shipment, ShipmentUpdate
+from app.schemas import ShipmentStatus, BaseShipment, ShipmentRead, ShipmentUpdate
+
+shipments = {
+    12001: {
+        "weight": 8.2,
+        "content": "aluminum sheets",
+        "status": "placed",
+        "destination": 11002,
+    },
+    12002: {
+        "weight": 14.7,
+        "content": "steel rods",
+        "status": "shipped",
+        "destination": 11003,
+    },
+    12003: {
+        "weight": 11.4,
+        "content": "copper wires",
+        "status": "delivered",
+        "destination": 11002,
+    },
+    12004: {
+        "weight": 17.8,
+        "content": "iron plates",
+        "status": "in transit",
+        "destination": 11005,
+    },
+    12005: {
+        "weight": 10.3,
+        "content": "brass fittings",
+        "status": "returned",
+        "destination": 11008,
+    },
+}
 
 app = FastAPI()
 
-db = {
-    12001: {"weight": 0.6, "content": "Glassware", "detail": "In-Transit"},
-    12002: {"weight": 0.5, "content": "Books", "detail": "Pending"},
-    12003: {"weight": 3.0, "content": "Furniture", "detail": "In-Transit"},
-    12004: {"weight": 0.2, "content": "Clothing", "detail": "Delivered"},
-    12005: {"weight": 1.5, "content": "Tools", "detail": "Available"},
-    12006: {"weight": 0.8, "content": "Toys", "detail": "In-Transit"},
-    12007: {"weight": 2.5, "content": "Appliances", "detail": "Pending"},
-}
 
-
-@app.get("/shipment/latest")
-def get_latest_shipment() -> dict[str, Any]:
-    latest_id = max(db.keys())
-    return {"id": latest_id} | db[latest_id]
-
-
-@app.get("/shipment")
-def get_shipment(id: int | None = None) -> dict[str, Any]:
-    if id is None:
+@app.get("/shipments", response_model= ShipmentRead)
+def get_shipment(id: int):
+    if id not in shipments:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Please provide an ID to fetch the shipment details!",
+            status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
         )
-    if id not in db:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Given ID #{id} does not exist in the database!",
-        )
-    return {"id": id} | db[id]
+    return shipments[id]
 
 
-@app.post("/shipment")
-def submit_shipment(
-    weight: float | None = None, content: str | None = None
-) -> dict[str, Any]:
-    if weight is None or content is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Please provide both weight and content to submit a shipment!",
-        )
-    if weight > 25:
-        raise HTTPException(
-            status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Maximum weight is 25kg!"
-        )
-    new_id = max(db.keys()) + 1
-    db[new_id] = {"weight": weight, "content": content, "detail": "Placed"}
-    return {"id": new_id} | db[new_id]
-
-
-@app.post("/shipment/body")
-def submit_shipment_body(data: Shipment) -> dict[str, Any]:
-    weight = data.weight
-    content = data.content
-    destination = data.destination
-    details = data.details
-    new_id = max(db.keys()) + 1
-    db[new_id] = {
-        "weight": weight, 
-        "content": content, 
-        "destination": destination,
-        "detail": details
+@app.post("/shipments", response_model=ShipmentRead)
+def submit_shipment(data: BaseShipment):
+    new_id = max(shipments.keys()) + 1
+    shipments[new_id] = {
+        **data.model_dump(),
+        "status": ShipmentStatus.placed
     }
-    return {"id": new_id} | db[new_id]
+    return shipments[new_id]|{"details": f"Shipment created with ID {new_id}"}
 
 
-@app.get("/shipment/{field}")
-def shipment_field(field: str, id: int) -> dict[str, Any]:
-    return {field: db[id][field]}
-
-
-@app.put("/shipment")
-def update_shipment(
-    id: int,
-    weight: float | None = None,
-    content: str | None = None,
-    detail: str = "Placed"
-) -> dict[str, Any]:
-    if id not in db:
+@app.patch("/shipments", response_model=ShipmentUpdate)
+def update_shipment(id: int, data: ShipmentUpdate):
+    if id not in shipments:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Given ID {id} does not exist in the database!",
+            status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
         )
-    if weight is None or content is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Please provide both weight and content to submit a shipment!",
-        )
-    if weight > 25:
-        raise HTTPException(
-            status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Maximum weight is 25kg!"
-        )
-    db[id] = {"weight": weight, "content": content, "detail": detail}
-    return {"id": id} | db[id]
-
-
-@app.put("/shipment/body")
-def update_shipment_body(id: int, data: dict[str, ShipmentUpdate]) -> dict[str, Any]:
-    db[id].update(data)
-    return {"id": id} | db[id]
-
-@app.patch("/shipment")
-def patch_shipment(
-    id: int,
-    weight: float | None = None,
-    content: str | None = None,
-    detail: str | None = None
-) -> dict[str, Any]:
-    if id not in db:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Given ID {id} does not exist in the database!",
-        )
-    if weight:
-        db[id]["weight"] = weight
-    if content:
-        db[id]["content"] = content
-    if detail:
-        db[id]["detail"] = detail
-    return {"id": id} | db[id]
-
-
-@app.patch("/shipment/body")
-def patch_shipment_body(id : int, data : dict[str, Any]) -> dict[str, Any]:   
-    db[id].update(data)
-    return {"id": id} | db[id]
-
-
-@app.delete("/shipment")
-def delete_shipment(id: int) -> dict[str, Any]:
-    data = db.pop(id)
-    return {"detail": f"Shipment with ID #{id} has been deleted!", "data": {"id": id} | data}
+    shipments[id] = {
+        **data.model_dump(exclude_none=True)
+    }
+    return shipments[id]
 
 
 @app.get("/http_docs", include_in_schema=False)
-def get_scalar_docs():
+def get_docs():
     return get_scalar_api_reference(
-        openapi_url=app.openapi_url, title="Scalar API Reference"
+        openapi_url=app.openapi_url,
+        title="Shipment API Documentation"
     )
