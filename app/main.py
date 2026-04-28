@@ -39,6 +39,12 @@ shipments = {
 app = FastAPI()
 
 
+@app.get("/shipments/latest", response_model=None)
+def get_latest_shipment():
+    id = max(shipments.keys())
+    return {"id": id} | shipments[id]
+
+
 @app.get("/shipments", response_model= ShipmentRead)
 def get_shipment(id: int):
     if id not in shipments:
@@ -55,7 +61,7 @@ def submit_shipment(data: BaseShipment):
         **data.model_dump(),
         "status": ShipmentStatus.placed
     }
-    return shipments[new_id]|{"details": f"Shipment created with ID {new_id}"}
+    return shipments[new_id]|{"details": f"Shipment created with ID #{new_id}"}
 
 
 @app.patch("/shipments", response_model=ShipmentUpdate)
@@ -68,6 +74,14 @@ def update_shipment(id: int, data: ShipmentUpdate):
         **data.model_dump(exclude_none=True)
     }
     return shipments[id]
+
+
+@app.delete("/shipments", response_model=None)
+def delete_shipment(id: int):
+    shipments.pop(id)
+    return {
+        "details": f"Shipment with ID #{id} has been deleted"
+    }
 
 
 @app.get("/http_docs", include_in_schema=False)
