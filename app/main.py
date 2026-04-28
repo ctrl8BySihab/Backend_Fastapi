@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 
-from app.schemas import ShipmentStatus, BaseShipment, ShipmentRead, ShipmentUpdate
+from app.schemas import ShipmentStatus, BaseShipment, ShipmentRead, ShipmentCreate, ShipmentUpdate
 
 shipments = {
     12001: {
@@ -13,7 +13,7 @@ shipments = {
     12002: {
         "weight": 14.7,
         "content": "steel rods",
-        "status": "shipped",
+        "status": "in_transit",
         "destination": 11003,
     },
     12003: {
@@ -25,16 +25,17 @@ shipments = {
     12004: {
         "weight": 17.8,
         "content": "iron plates",
-        "status": "in transit",
+        "status": "in_transit",
         "destination": 11005,
     },
     12005: {
         "weight": 10.3,
         "content": "brass fittings",
-        "status": "returned",
+        "status": "delivered",
         "destination": 11008,
     },
 }
+
 
 app = FastAPI()
 
@@ -55,13 +56,13 @@ def get_shipment(id: int):
 
 
 @app.post("/shipments", response_model=ShipmentRead)
-def submit_shipment(data: BaseShipment):
+def submit_shipment(data: ShipmentCreate):
     new_id = max(shipments.keys()) + 1
     shipments[new_id] = {
         **data.model_dump(),
         "status": ShipmentStatus.placed
     }
-    return shipments[new_id]|{"details": f"Shipment created with ID #{new_id}"}
+    return shipments[new_id]
 
 
 @app.patch("/shipments", response_model=ShipmentUpdate)
@@ -70,14 +71,16 @@ def update_shipment(id: int, data: ShipmentUpdate):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
         )
-    shipments[id] = {
-        **data.model_dump(exclude_none=True)
-    }
+    shipments[id].update(**data.model_dump(exclude_none=True))
     return shipments[id]
 
 
 @app.delete("/shipments", response_model=None)
 def delete_shipment(id: int):
+    if id not in shipments:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
+        )
     shipments.pop(id)
     return {
         "details": f"Shipment with ID #{id} has been deleted"
