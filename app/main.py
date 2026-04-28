@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 from typing import Any
 
+from app.schemas import Shipment
+
 app = FastAPI()
 
 db = {
@@ -55,14 +57,17 @@ def submit_shipment(
 
 
 @app.post("/shipment/body")
-def submit_shipment_body(data: dict[str, Any]) -> dict[str, Any]:
-    weight = data["weight"]
-    content = data["content"]
+def submit_shipment_body(data: Shipment) -> dict[str, Any]:
+    weight = data.weight
+    content = data.content
+    destination = data.destination
+    details = data.details
     new_id = max(db.keys()) + 1
     db[new_id] = {
         "weight": weight, 
         "content": content, 
-        "detail": "Placed"
+        "destination": destination,
+        "detail": details
     }
     return {"id": new_id} | db[new_id]
 
@@ -119,8 +124,9 @@ def patch_shipment(
 
 
 @app.patch("/shipment/body")
-def patch_shipment_body(id : int, data : dict[str, Any]) -> dict[str, Any]:
-    db[id].update(data)
+def patch_shipment_body(id : int, data : Shipment) -> dict[str, Any]:
+    
+    db[id].update({"weight": data.weight, "content": data.content, "destination": data.destination, "detail": data.details})
     return {"id": id} | db[id]
 
 
