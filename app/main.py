@@ -2,40 +2,7 @@ from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 
 from app.schemas import ShipmentStatus, BaseShipment, ShipmentRead, ShipmentCreate, ShipmentUpdate
-
-shipments = {
-    12001: {
-        "weight": 8.2,
-        "content": "aluminum sheets",
-        "status": "placed",
-        "destination": 11002,
-    },
-    12002: {
-        "weight": 14.7,
-        "content": "steel rods",
-        "status": "in_transit",
-        "destination": 11003,
-    },
-    12003: {
-        "weight": 11.4,
-        "content": "copper wires",
-        "status": "delivered",
-        "destination": 11002,
-    },
-    12004: {
-        "weight": 17.8,
-        "content": "iron plates",
-        "status": "in_transit",
-        "destination": 11005,
-    },
-    12005: {
-        "weight": 10.3,
-        "content": "brass fittings",
-        "status": "delivered",
-        "destination": 11008,
-    },
-}
-
+from app.database import shipments, save
 
 app = FastAPI()
 
@@ -55,23 +22,26 @@ def get_shipment(id: int):
     return shipments[id]
 
 
-@app.post("/shipments", response_model=ShipmentRead)
+@app.post("/shipments", response_model=None)
 def submit_shipment(data: ShipmentCreate):
     new_id = max(shipments.keys()) + 1
     shipments[new_id] = {
+        "id": new_id,
         **data.model_dump(),
         "status": ShipmentStatus.placed
     }
-    return shipments[new_id]
+    save()
+    return {"details": f"Shipment with ID #{new_id} has been submitted", "id": new_id} | shipments[new_id]
 
 
-@app.patch("/shipments", response_model=ShipmentUpdate)
+@app.patch("/shipments", response_model=None)
 def update_shipment(id: int, data: ShipmentUpdate):
     if id not in shipments:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
         )
     shipments[id].update(**data.model_dump(exclude_none=True))
+    save()
     return shipments[id]
 
 
