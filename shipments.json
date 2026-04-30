@@ -1,1 +1,58 @@
-[{"id": 12001, "weight": 8.2, "content": "aluminum sheets", "status": "placed", "destination": 11002}, {"id": 12002, "weight": 14.7, "content": "steel rods", "status": "in_transit", "destination": 11003}, {"id": 12003, "weight": 11.4, "content": "copper wires", "status": "delivered", "destination": 11002}, {"id": 12004, "weight": 17.8, "content": "iron plates", "status": "in_transit", "destination": 11005}, {"id": 12005, "weight": 10.3, "content": "brass fittings", "status": "delivered", "destination": 11008}, {"id": 12006, "weight": 10.0, "content": "Car parts", "destination": 89898, "status": "placed"}, {"id": 12007, "weight": 0.6, "content": "Books", "destination": 13313, "status": "placed"}, {"id": 12008, "weight": 6.6, "content": "Metal parts", "destination": 14002, "status": "delivered"}]
+[
+    {
+        "id": 12001,
+        "weight": 8.2,
+        "content": "aluminum sheets",
+        "status": "placed",
+        "destination": 11002
+    },
+    {
+        "id": 12002,
+        "weight": 14.7,
+        "content": "steel rods",
+        "status": "in_transit",
+        "destination": 11003
+    },
+    {
+        "id": 12003,
+        "weight": 11.4,
+        "content": "copper wires",
+        "status": "delivered",
+        "destination": 11002
+    },
+    {
+        "id": 12004,
+        "weight": 17.8,
+        "content": "iron plates",
+        "status": "in_transit",
+        "destination": 11005
+    },
+    {
+        "id": 12005,
+        "weight": 10.3,
+        "content": "brass fittings",
+        "status": "delivered",
+        "destination": 11008
+    },
+    {
+        "id": 12006,
+        "weight": 10.0,
+        "content": "Car parts",
+        "destination": 89898,
+        "status": "delivered"
+    },
+    {
+        "id": 12007,
+        "weight": 0.6,
+        "content": "Books",
+        "destination": 13313,
+        "status": "placed"
+    },
+    {
+        "id": 12008,
+        "weight": 6.6,
+        "content": "Metal parts",
+        "destination": 14002,
+        "status": "delivered"
+    }
+]

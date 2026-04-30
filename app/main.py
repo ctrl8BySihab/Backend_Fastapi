@@ -7,12 +7,14 @@ from app.database import shipments, save
 app = FastAPI()
 
 
+# Returns the shipment with the highest ID
 @app.get("/shipments/latest", response_model=None)
 def get_latest_shipment():
     id = max(shipments.keys())
     return {"id": id} | shipments[id]
 
 
+# Returns a single shipment by ID
 @app.get("/shipments", response_model= ShipmentRead)
 def get_shipment(id: int):
     if id not in shipments:
@@ -22,6 +24,7 @@ def get_shipment(id: int):
     return shipments[id]
 
 
+# Creates a new shipment with status "placed" and persists to JSON
 @app.post("/shipments", response_model=None)
 def submit_shipment(data: ShipmentCreate):
     new_id = max(shipments.keys()) + 1
@@ -34,6 +37,7 @@ def submit_shipment(data: ShipmentCreate):
     return {"details": f"Shipment with ID #{new_id} has been submitted", "id": new_id} | shipments[new_id]
 
 
+# Partially updates a shipment; only provided fields are changed
 @app.patch("/shipments", response_model=None)
 def update_shipment(id: int, data: ShipmentUpdate):
     if id not in shipments:
@@ -45,6 +49,7 @@ def update_shipment(id: int, data: ShipmentUpdate):
     return shipments[id]
 
 
+# Removes a shipment from the store and persists the change
 @app.delete("/shipments", response_model=None)
 def delete_shipment(id: int):
     if id not in shipments:
@@ -52,6 +57,7 @@ def delete_shipment(id: int):
             status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
         )
     shipments.pop(id)
+    save()
     return {
         "details": f"Shipment with ID #{id} has been deleted"
     }
