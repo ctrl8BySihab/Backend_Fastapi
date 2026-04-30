@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 
 from app.schemas import ShipmentStatus, BaseShipment, ShipmentRead, ShipmentCreate, ShipmentUpdate
-from app.database import shipments, save
 
 app = FastAPI()
 
