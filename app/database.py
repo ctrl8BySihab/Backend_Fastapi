@@ -37,10 +37,12 @@ cursor = connection.cursor()
 # data = cursor.fetchall()
 # print(data)
 
-# Update the status of a shipment
+# # Update the status of a shipment
+id = 12004  # This is a malicious input that could lead to SQL injection
+status = "on_hold"
 cursor.execute("""
-UPDATE shipment SET status = "out_for_delivery" WHERE id = 12004
-""")
+UPDATE shipment SET status =:status WHERE id =:id
+""", {"id": id, "status": status})
 # Commit the changes to the database
 connection.commit()
 
