@@ -1,11 +1,12 @@
 from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 
-from app.schemas import ShipmentStatus, BaseShipment, ShipmentRead, ShipmentCreate, ShipmentUpdate
-from app.database import shipments, save
+from app.schemas import ShipmentStatus, ShipmentRead, ShipmentCreate, ShipmentUpdate
+from app.database import Database
 
 app = FastAPI()
 
+db = Database()
 
 # Returns the shipment with the highest ID
 @app.get("/shipments/latest", response_model=None)
@@ -17,11 +18,12 @@ def get_latest_shipment():
 # Returns a single shipment by ID
 @app.get("/shipments", response_model= ShipmentRead)
 def get_shipment(id: int):
-    if id not in shipments:
+    shipment = db.get(id)
+    if shipment is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
         )
-    return shipments[id]
+    return shipment
 
 
 # Creates a new shipment with status "placed" and persists to JSON

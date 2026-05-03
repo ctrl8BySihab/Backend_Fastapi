@@ -16,7 +16,7 @@ class BaseShipment(BaseModel):
         description="Weight of the shipment in kilograms", gt=0, le=25
     )
     content: str = Field(description="Description of the shipment content")
-    destination: int = Field(description="ID of the destination location")
+    destination: str = Field(description="Description of the shipment location")
 
 
 # Schema for reading/returning a shipment (includes status)
@@ -35,5 +35,5 @@ class ShipmentUpdate(BaseModel):
         description="Weight of the shipment in kilograms", gt=0, le=25, default=None
     )
     content: str | None = Field(description="Description of the shipment content", default=None)
-    destination: int | None = Field(description="ID of the destination location", default=None)
     status: ShipmentStatus = Field(description="Current status of the shipment")
+    destination: str = Field(description="Description of the shipment location")
