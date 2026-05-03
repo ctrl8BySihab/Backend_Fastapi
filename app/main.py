@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from scalar_fastapi import get_scalar_api_reference
 
-from app.schemas import ShipmentStatus, ShipmentRead, ShipmentCreate, ShipmentUpdate
+from app.schemas import ShipmentRead, ShipmentCreate, ShipmentUpdate
 from app.database import Database
 
 app = FastAPI()
@@ -11,8 +11,8 @@ db = Database()
 # Returns the shipment with the highest ID
 @app.get("/shipments/latest", response_model=None)
 def get_latest_shipment():
-    id = max(shipments.keys())
-    return {"id": id} | shipments[id]
+    shipment = db.get_latest()
+    return shipment
 
 # Returns a single shipment by ID
 @app.get("/shipments", response_model= ShipmentRead)
@@ -28,7 +28,7 @@ def get_shipment(id: int):
 @app.post("/shipments", response_model=None)
 def submit_shipment(data: ShipmentCreate):
     new_id = db.submit(data)
-    return {"details": f"Shipment with ID #{new_id} has been submitted", "id": new_id} | shipments[new_id]
+    return {"details": f"Shipment with ID #{new_id} has been submitted", "id": new_id}
 
 # Partially updates a shipment; only provided fields are changed
 @app.patch("/shipments", response_model=None)
@@ -41,16 +41,15 @@ def update_shipment(id: int, data: ShipmentUpdate):
     shipment = db.update(id, data)
     return shipment
 
-
 # Removes a shipment from the store and persists the change
 @app.delete("/shipments", response_model=None)
 def delete_shipment(id: int):
-    if id not in shipments:
+    shipment = db.get(id)
+    if shipment is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
         )
-    shipments.pop(id)
-    save()
+    db.delete(id)
     return {
         "details": f"Shipment with ID #{id} has been deleted"
     }

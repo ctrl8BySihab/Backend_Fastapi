@@ -1,10 +1,6 @@
 import sqlite3
 from typing import Any
-from app.schemas import ShipmentStatus, ShipmentRead, ShipmentCreate, ShipmentUpdate
-
-conn = sqlite3.connect("database.db")
-cur = conn.cursor()
-
+from app.schemas import ShipmentCreate, ShipmentUpdate
 
 class Database:
     def __init__(self):
@@ -17,7 +13,7 @@ class Database:
     # Create table in the database
     def create_table(self):
         self.cur.execute("""
-            CREATE TABLE IF NOT EXIST shipment (
+            CREATE TABLE IF NOT EXISTS shipment (
                         id INTEGER PRIMARY KEY, 
                         weight REAL, 
                         content TEXT,
@@ -67,18 +63,33 @@ class Database:
     
     # Update order
     def update(self, id: int, shipment: ShipmentUpdate) -> dict[str, Any] | None:
-        cur.execute("""
+        self.cur.execute("""
             UPDATE shipment
             SET status =:status
             WHERE id =:id
         """,
-        {"id" : id, **shipment.model_dump()}
+        {"id" : id, **shipment.model_dump(exclude_none=True)}
         )
         self.conn.commit()
         return self.get(id)
     
-    
-    def
+    # Delete order
+    def delete(self, id):
+        self.cur.execute("""
+            DELETE FROM shipment
+            WHERE id =:id
+        """,
+        {"id": id}
+        )
+        self.conn.commit()   
+
+    # To get the latest shipment
+    def get_latest(self):
+        self.cur.execute("""
+            SELECT MAX(id) FROM shipment
+        """)
+        new_id = self.cur.fetchone()[0]
+        return self.get(new_id)
 
     # Close the connection
     def close(self):
