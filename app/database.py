@@ -3,12 +3,11 @@ from typing import Any
 from app.schemas import ShipmentCreate, ShipmentUpdate
 
 class Database:
-    def __init__(self):
+    # Create connection to the database 
+    def connect_to_database(self):
         # Create connection and cursor
         self.conn = sqlite3.connect("database.db", check_same_thread=False)
         self.cur = self.conn.cursor()
-
-        self.create_table()
     
     # Create table in the database
     def create_table(self):
@@ -94,3 +93,13 @@ class Database:
     # Close the connection
     def close(self):
         self.conn.close()
+
+    # Enter method for context manager
+    def __enter__(self):
+        self.connect_to_database()
+        self.create_table()
+        return self
+    
+    # Exit method for context manager
+    def __exit__(self, *args):
+        self.close()
