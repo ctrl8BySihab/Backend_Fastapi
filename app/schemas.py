@@ -1,14 +1,6 @@
 from pydantic import BaseModel, Field
 from enum import Enum
-
-
-# Possible lifecycle states of a shipment
-class ShipmentStatus(str, Enum):
-    placed = "placed"
-    in_transit = "in_transit"
-    out_for_delivery = "out_for_delivery"
-    delivered = "delivered"
-
+from app.database.model import ShipmentStatus
 
 # Shared fields used across create and read schemas
 class BaseShipment(BaseModel):
