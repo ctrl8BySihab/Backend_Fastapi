@@ -1,6 +1,7 @@
 import sqlite3
 from typing import Any
 from app.schemas import ShipmentCreate, ShipmentUpdate
+from contextlib import contextmanager
 
 class Database:
     # Create connection to the database 
@@ -94,12 +95,26 @@ class Database:
     def close(self):
         self.conn.close()
 
-    # Enter method for context manager
-    def __enter__(self):
-        self.connect_to_database()
-        self.create_table()
-        return self
+    # # Enter method for context manager
+    # def __enter__(self):
+    #     self.connect_to_database()
+    #     self.create_table()
+    #     return self
     
-    # Exit method for context manager
-    def __exit__(self, *args):
-        self.close()
+    # # Exit method for context manager
+    # def __exit__(self, *args):
+    #     self.close()
+
+# Adding Context manager using @contextmanager decorator
+@contextmanager
+def managed_db():
+    db = Database()
+    db.connect_to_database()
+    db.create_table()
+
+    yield db
+    db.close
+
+# Some random test
+with managed_db() as db:
+    print(db.get(12003))
