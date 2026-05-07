@@ -9,7 +9,7 @@ engine = create_engine(
 )
 
 # Create a method to use this task from another module
-def connect_table():
+def manage_table():
     # Import models so SQLModel.metadata is aware of all tables
     from app.database.model import Shipment
     SQLModel.metadata.create_all(bind=engine)

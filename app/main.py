@@ -3,14 +3,14 @@ from scalar_fastapi import get_scalar_api_reference
 
 from app.schemas import ShipmentRead, ShipmentCreate, ShipmentUpdate
 from app.database import Database
-from app.database.session import connect_table
+from app.database.session import manage_table
 
 from contextlib import asynccontextmanager
 
 # Add context manager
 @asynccontextmanager
 async def lifespan_handler(app: FastAPI):
-    connect_table()
+    manage_table()
     yield
 
 app = FastAPI(lifespan=lifespan_handler)
