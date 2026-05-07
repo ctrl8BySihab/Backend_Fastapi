@@ -8,6 +8,7 @@ engine = create_engine(
     connect_args={"check_same_thread": False}  # Required for SQLite with FastAPI
 )
 
+
 # Import models so SQLModel.metadata is aware of all tables
 from app.database.model import Shipment
 

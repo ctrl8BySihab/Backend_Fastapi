@@ -27,5 +27,5 @@ class ShipmentUpdate(BaseModel):
         description="Weight of the shipment in kilograms", gt=0, le=25, default=None
     )
     content: str | None = Field(description="Description of the shipment content", default=None)
-    status: ShipmentStatus = Field(description="Current status of the shipment", default=ShipmentStatus.placed)
+    status: ShipmentStatus | None = Field(description="Current status of the shipment", default=None)
     destination: str | None= Field(description="Description of the shipment location", default=None)
