@@ -8,9 +8,8 @@ engine = create_engine(
     connect_args={"check_same_thread": False}  # Required for SQLite with FastAPI
 )
 
-
-# Import models so SQLModel.metadata is aware of all tables
-from app.database.model import Shipment
-
-# Create all tables defined in SQLModel models if they don't exist
-SQLModel.metadata.create_all(bind=engine)
+# Create a method to use this task from another module
+def connect_table():
+    # Import models so SQLModel.metadata is aware of all tables
+    from app.database.model import Shipment
+    SQLModel.metadata.create_all(bind=engine)

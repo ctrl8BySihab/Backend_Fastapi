@@ -4,6 +4,9 @@ from app.schemas import ShipmentCreate, ShipmentUpdate
 from contextlib import contextmanager
 
 class Database:
+    
+    def __init__(self):
+        pass
     # Create connection to the database 
     def connect_to_database(self):
         # Create connection and cursor
