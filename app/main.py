@@ -5,7 +5,7 @@ from sqlmodel import Session
 
 from app.schemas import ShipmentRead, ShipmentCreate, ShipmentUpdate
 from app.database import Database
-from app.database.session import create_tablegitr, get_session
+from app.database.session import create_table, get_session
 from app.database.model import Shipment
 
 from contextlib import asynccontextmanager
