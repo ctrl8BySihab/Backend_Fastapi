@@ -28,7 +28,7 @@ def get_latest_shipment():
 
 # Returns a single shipment by ID
 @app.get("/shipments", response_model= ShipmentRead)
-def get_shipment(id: int, session: Session = Depends(get_session)):
+def get_shipment(id: int, session: Session = get_session()):
     shipment = session.get(Shipment, id)
     if shipment is None:
         raise HTTPException(
