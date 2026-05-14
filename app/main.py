@@ -5,7 +5,7 @@ from sqlmodel import Session
 
 from app.schemas import ShipmentRead, ShipmentCreate, ShipmentUpdate
 from app.database import Database
-from app.database.session import create_table, get_session
+from app.database.session import create_table, SessionDep
 from app.database.model import Shipment
 
 from contextlib import asynccontextmanager
@@ -28,7 +28,7 @@ def get_latest_shipment():
 
 # Returns a single shipment by ID
 @app.get("/shipments", response_model= ShipmentRead)
-def get_shipment(id: int, session: Session = Depends(get_session)):
+def get_shipment(id: int, session: SessionDep):
     shipment = session.get(Shipment, id)
     if shipment is None:
         raise HTTPException(
@@ -38,13 +38,13 @@ def get_shipment(id: int, session: Session = Depends(get_session)):
 
 # Creates a new shipment with status "placed" and persists to JSON
 @app.post("/shipments", response_model=None)
-def submit_shipment(data: ShipmentCreate):
+def submit_shipment(data: ShipmentCreate, session: SessionDep):
     new_id = db.submit(data)
     return {"details": f"Shipment with ID #{new_id} has been submitted", "id": new_id}
 
 # Partially updates a shipment; only provided fields are changed
 @app.patch("/shipments", response_model=None)
-def update_shipment(id: int, data: ShipmentUpdate):
+def update_shipment(id: int, data: ShipmentUpdate, session: SessionDep):
     shipment = db.get(id)
     if shipment is None:
         raise HTTPException(
@@ -55,7 +55,7 @@ def update_shipment(id: int, data: ShipmentUpdate):
 
 # Removes a shipment from the store and persists the change
 @app.delete("/shipments", response_model=None)
-def delete_shipment(id: int):
+def delete_shipment(id: int, session: SessionDep):
     shipment = db.get(id)
     if shipment is None:
         raise HTTPException(
