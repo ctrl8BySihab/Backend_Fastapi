@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, Session
+from app.database.model import Shipment
 
 # Create the database engine connected to sqlite.db
 engine = create_engine(
@@ -9,7 +10,11 @@ engine = create_engine(
 )
 
 # Create a method to use this task from another module
-def manage_table():
+def create_table():
     # Import models so SQLModel.metadata is aware of all tables
-    from app.database.model import Shipment
     SQLModel.metadata.create_all(bind=engine)
+
+# Get a fresh session for each endpoint request
+def get_session():
+    with Session(bind=engine) as session:
+        yield session

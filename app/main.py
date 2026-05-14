@@ -1,16 +1,19 @@
 from fastapi import FastAPI, HTTPException, status
+from fastapi.params import Depends
 from scalar_fastapi import get_scalar_api_reference
+from sqlmodel import Session
 
 from app.schemas import ShipmentRead, ShipmentCreate, ShipmentUpdate
 from app.database import Database
-from app.database.session import manage_table
+from app.database.session import create_tablegitr, get_session
+from app.database.model import Shipment
 
 from contextlib import asynccontextmanager
 
 # Add context manager
 @asynccontextmanager
 async def lifespan_handler(app: FastAPI):
-    manage_table()
+    create_table()
     yield
 
 app = FastAPI(lifespan=lifespan_handler)
@@ -25,8 +28,8 @@ def get_latest_shipment():
 
 # Returns a single shipment by ID
 @app.get("/shipments", response_model= ShipmentRead)
-def get_shipment(id: int):
-    shipment = db.get(id)
+def get_shipment(id: int, session: Session = Depends(get_session)):
+    shipment = session.get(Shipment, id)
     if shipment is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
