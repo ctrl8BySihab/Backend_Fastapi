@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from sqlmodel import Enum, Field, SQLModel
+from enum import Enum
+from sqlmodel import Field, SQLModel
 
 # Possible lifecycle states of a shipment
 class ShipmentStatus(str, Enum):
@@ -13,7 +14,7 @@ class Shipment(SQLModel, table=True):
     
     __tablename__ = "shipment"
     
-    id: int = Field(primary_key=True)
+    id: int = Field(primary_key=True, default=None)
     content: str
     weight: float = Field(le=25)
     destination: int

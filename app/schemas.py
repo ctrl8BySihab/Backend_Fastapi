@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 from enum import Enum
 from app.database.model import ShipmentStatus
+
 
 # Shared fields used across create and read schemas
 class BaseShipment(BaseModel):
@@ -8,13 +11,17 @@ class BaseShipment(BaseModel):
         description="Weight of the shipment in kilograms", gt=0, le=25
     )
     content: str = Field(description="Description of the shipment content")
-    destination: str | None = Field(description="Description of the shipment location", default=None)
+    destination: int | None = Field(
+        description="Description of the shipment location", default=None
+    )
 
 
 # Schema for reading/returning a shipment (includes status)
 class ShipmentRead(BaseShipment):
     status: ShipmentStatus = Field(description="Current status of the shipment")
-
+    estimated_delivery: datetime | None = Field(
+        description="Description of the estimated delivery time", default=None
+    )
 
 # Schema for creating a shipment (status is auto-set to "placed")
 class ShipmentCreate(BaseShipment):
@@ -26,6 +33,15 @@ class ShipmentUpdate(BaseModel):
     weight: float | None = Field(
         description="Weight of the shipment in kilograms", gt=0, le=25, default=None
     )
-    content: str | None = Field(description="Description of the shipment content", default=None)
-    status: ShipmentStatus | None = Field(description="Current status of the shipment", default=None)
-    destination: str | None= Field(description="Description of the shipment location", default=None)
+    content: str | None = Field(
+        description="Description of the shipment content", default=None
+    )
+    status: ShipmentStatus | None = Field(
+        description="Current status of the shipment", default=None
+    )
+    destination: int | None = Field(
+        description="Description of the shipment location", default=None
+    )
+    estimated_delivery: datetime | None = Field(
+        description="Description of the estimated delivery time", default=None
+    )
